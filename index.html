@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Model</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #111827;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 16px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 25px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 16px;
+      resize: vertical;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: 0;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #111827;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 16px;
+      background: white;
+      border-radius: 12px;
+      min-height: 80px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>World Model</h1>
+
+    <div class="subtitle">
+      Ask World Model anything
+    </div>
+
+    <textarea
+      id="question"
+      placeholder="Type your question here..."
+    ></textarea>
+
+    <button id="askButton">
+      Ask World Model
+    </button>
+
+    <div id="response" class="response">
+      Your answer will appear here.
+    </div>
+
+  </div>
+
+  <script>
+    const question = document.getElementById("question");
+    const askButton = document.getElementById("askButton");
+    const response = document.getElementById("response");
+
+    askButton.addEventListener("click", async () => {
+
+      const text = question.value.trim();
+
+      if (!text) {
+        response.textContent = "Please enter a question.";
+        return;
+      }
+
+      askButton.disabled = true;
+      askButton.textContent = "Thinking...";
+      response.textContent = "World Model is thinking...";
+
+      try {
+
+        const result = await fetch(
+          "https://world-model-backend.onrender.com/ask",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              question: text
+            })
+          }
+        );
+
+        if (!result.ok) {
+          throw new Error("Backend request failed: " + result.status);
+        }
+
+        const data = await result.json();
+
+        response.textContent =
+          data.answer || "No answer received.";
+
+      } catch (error) {
+
+        response.textContent =
+          "World Model backend is not available. Please try again.";
+
+      } finally {
+
+        askButton.disabled = false;
+        askButton.textContent = "Ask World Model";
+
+      }
+
+    });
+  </script>
+
+</body>
+</html>
